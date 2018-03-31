@@ -13,8 +13,15 @@
 #include <psp2/power.h>
 #include <psp2/kernel/processmgr.h>
 #include <vita2d.h>
-#include <psp2/appmgr.h>
-
+int flash(const char *sfpath){
+	tai_module_args_t argg;
+	argg.size = sizeof(argg);
+	argg.pid = KERNEL_PID;
+	argg.args = 0;
+	argg.argp = NULL;
+	argg.flags = 0;
+	taiLoadStartKernelModuleForUser(sfpath, &argg);
+    return 0;}
 int main() {
 	SceCtrlData pad, old_pad;
 	unsigned int keys_down;
@@ -25,9 +32,7 @@ int main() {
 	vita2d_set_clear_color(RGBA8(0x00, 0x00, 0x00, 0xFF));
 	font = vita2d_load_default_pgf();
 	memset(&pad, 0, sizeof(pad));
-	const char MainMenuOpts[3][64] = {"Flash spoof", "UnFlash spoof", "Exit"};
-	const char PSubMenuOpts[4][64] = {"Back", "Back", "Start the flasher", "Back"};
-	const char USubMenuOpts[4][64] = {"Back", "Back", "Start the flasher", "Back"};
+	const char MainMenuOpts[5][64] = {"Flash DEX spoof", "Flash TOOL spoof", "Flash TEST spoof", "UnFlash spoof", "Exit"};
 	int UIScreen = 1;
 	int selected = 0;
 	
@@ -38,37 +43,17 @@ int main() {
 		vita2d_start_drawing();
 		vita2d_clear_screen();
 		
-		vita2d_pgf_draw_text(font, 215, 45, RGBA8(255,255,255,255), 1.5f, "MINIREX v2.0 by SKGleba");
+		vita2d_pgf_draw_text(font, 215, 45, RGBA8(255,255,255,255), 1.5f, "MINIREX v3.0 by SKGleba");
 		
 		switch(UIScreen) {
 			case 1: // Main Menu
 				if (selected < 0) selected = 0;
-				if (selected > 2) selected = 2;
-				for (int i = 0; i < 3; i++) {
+				if (selected > 4) selected = 4;
+				for (int i = 0; i < 5; i++) {
 					if (i == selected) {
 						vita2d_draw_rectangle(70, (80*i) + 85, 820, 70, RGBA8(226,92,92,255));
 						vita2d_pgf_draw_text(font, 85, (80*i) + 130, RGBA8(0,0,0,255), 1.5f, MainMenuOpts[i]);
 					} else vita2d_pgf_draw_text(font, 85, (80*i) + 130, RGBA8(255,255,255,255), 1.5f, MainMenuOpts[i]);
-				}
-				break;
-			case 11: // Main Menu
-				if (selected < 0) selected = 0;
-				if (selected > 3) selected = 3;
-				for (int i = 0; i < 4; i++) {
-					if (i == selected) {
-						vita2d_draw_rectangle(70, (80*i) + 85, 820, 70, RGBA8(226,92,92,255));
-						vita2d_pgf_draw_text(font, 85, (80*i) + 130, RGBA8(0,0,0,255), 1.5f, PSubMenuOpts[i]);
-					} else vita2d_pgf_draw_text(font, 85, (80*i) + 130, RGBA8(255,255,255,255), 1.5f, PSubMenuOpts[i]);
-				}
-				break;
-			case 12: // Main Menu
-				if (selected < 0) selected = 0;
-				if (selected > 3) selected = 3;
-				for (int i = 0; i < 4; i++) {
-					if (i == selected) {
-						vita2d_draw_rectangle(70, (80*i) + 85, 820, 70, RGBA8(226,92,92,255));
-						vita2d_pgf_draw_text(font, 85, (80*i) + 130, RGBA8(0,0,0,255), 1.5f, USubMenuOpts[i]);
-					} else vita2d_pgf_draw_text(font, 85, (80*i) + 130, RGBA8(255,255,255,255), 1.5f, USubMenuOpts[i]);
 				}
 				break;
 		}
@@ -79,21 +64,11 @@ int main() {
                      sceKernelExitProcess(0);
 					break;
 				case 1:
-					if (selected == 0) UIScreen = 11;
-					if (selected == 1) UIScreen = 12;
-                    if (selected == 2) sceKernelExitProcess(0);
-					break;
-				case 11:
-					if (selected == 0) UIScreen = 1;
-					if (selected == 1) UIScreen = 1;
-					if (selected == 2) sceAppMgrLoadExec("app0:flashman", NULL, NULL);
-					if (selected == 3) UIScreen = 1;
-					break;
-				case 12:
-					if (selected == 0) UIScreen = 1;
-					if (selected == 1) UIScreen = 1;
-					if (selected == 2) sceAppMgrLoadExec("app0:unflashman", NULL, NULL);
-					if (selected == 3) UIScreen = 1;
+					if (selected == 3) flash("ux0:app/SKGM1NR3X/unflasher");
+					if (selected == 0) flash("ux0:app/SKGM1NR3X/dflasher");
+					if (selected == 1) flash("ux0:app/SKGM1NR3X/tflasher");
+					if (selected == 2) flash("ux0:app/SKGM1NR3X/itflasher");
+                    if (selected == 4) sceKernelExitProcess(0);
 					break;
 			}
 		}
@@ -103,22 +78,10 @@ int main() {
 				case 1:
 					selected -= 1;
 					break;
-				case 11:
-					selected -= 1;
-					break;
-				case 12:
-					selected -= 1;
-					break;
 			}
 		} if (keys_down & SCE_CTRL_DOWN) {
 			switch(UIScreen) {
 				case 1:
-					selected += 1;
-					break;
-				case 11:
-					selected += 1;
-					break;
-				case 12:
 					selected += 1;
 					break;
 }
